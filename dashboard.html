@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Manager Dashboard</title>
+  <style>
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      color: #ffcc00;
+      margin-top: 30px;
+    }
+
+    .form-box, .list-box {
+      background: #1f1f1f;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #00000050;
+    }
+
+    input {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin: 5px 0;
+      background: #2e2e2e;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      min-width: 70px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #2e2e2e;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1f1f1f;
+      color: #ffcc00;
+    }
+
+    tr:nth-child(even) {
+      background-color: #2e2e2e;
+    }
+
+    tr:hover {
+      background-color: #333333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <h2>Add New Book</h2>
+      <input id="title" placeholder="Title">
+      <input id="author" placeholder="Author">
+      <input id="genre" placeholder="Genre">
+      <input id="year" type="number" placeholder="Year">
+      <button onclick="addBook()">Add Book</button>
+    </div>
+
+    <div class="list-box">
+      <h2>Book List</h2>
+      <table id="bookTable">
+        <thead>
+          <tr><th>Title</th><th>Author</th><th>Genre</th><th>Year</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function fetchBooks() {
+      const res = await fetch('/api/books');
+      const books = await res.json();
+      const tbody = document.querySelector('#bookTable tbody');
+      tbody.innerHTML = '';
+      books.forEach(book => {
+        const row = `<tr>
+          <td>${book.title}</td>
+          <td>${book.author}</td>
+          <td>${book.genre}</td>
+          <td>${book.year}</td>
+          <td><button onclick="deleteBook('${book._id}')">Delete</button></td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    async function addBook() {
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const genre = document.getElementById('genre').value;
+      const year = parseInt(document.getElementById('year').value);
+      await fetch('/api/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author, genre, year })
+      });
+      fetchBooks();
+    }
+
+    async function deleteBook(id) {
+      await fetch(`/api/books/${id}`, { method: 'DELETE' });
+      fetchBooks();
+    }
+
+    fetchBooks();
+  </script>
+</body>
+</html>
